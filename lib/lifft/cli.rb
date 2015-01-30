@@ -3,6 +3,7 @@
 require 'zip'
 require 'thread'
 require 'io/console'
+require 'tmpdir'
 
 require 'thor'
 require 'httmultiparty'
@@ -153,11 +154,12 @@ module Lifft
       auth = {:username => username, :password => password}
 
       projectName = options[:project]
-      stringFilePath = "/xliffs"
 
-      system("xcodebuild -exportLocalizations -localizationPath #{stringFilePath.chomp} -project #{projectName.chomp}"+warningSuppressor)
+      dir = Dir.mktmpdir
+      
+      system("xcodebuild -exportLocalizations -localizationPath #{dir.chomp} -project #{projectName.chomp}"+warningSuppressor)
 
-      body = {"file" => File.new(stringFilePath+"/en.xliff")}
+      body = {"file" => File.new(dir+"/en.xliff")}
 
       if !options[:new]
         # Update master
