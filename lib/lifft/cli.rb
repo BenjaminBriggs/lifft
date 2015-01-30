@@ -8,7 +8,7 @@ require 'tmpdir'
 require 'thor'
 require 'httmultiparty'
 
-require 'getlocal'
+require 'lifft'
 
 Thread.abort_on_exception = true
 
@@ -17,6 +17,7 @@ module Lifft
     class_option :verbose, :type => :boolean, :aliases => "-v"
 
     method_option :user, :required => true, :aliases => "-u"
+    method_option :project, :required => true, :type => :string
     method_option :password, :aliases => "-p"
     method_option :timeout, :type => :numeric, :default => 600, :aliases => "-t"
     desc "fetch [PROJECT]", "Used to fetch the latest localisations"
@@ -56,8 +57,6 @@ module Lifft
 
       puts "Fetching the zip. This may take a while" if options[:verbose]
 
-      zipfile = Tempfile.new("file")
-
       if options[:verbose] then
         spinner = Thread.new do
           #set up spinner
@@ -71,17 +70,19 @@ module Lifft
         end
       end
 
+      tempfile = Tempfile.new("file")
+
       begin
-        response = HTTParty.get("https://api.getlocalization.com/#{project}/api/translations/zip/", :basic_auth => auth, :timeout => options[:timeout])
+        response = HTTParty.get("https://api.getlocalization.com/#{project}/api/translations/file/en.xliff/ar/", :basic_auth => auth, :timeout => options[:timeout])
       rescue
         puts "Oh no, somthing fucked up."
         return
       else
         spinner.exit if options[:verbose]
         if response.code == 200
-          puts "Zip downloaded" if options[:verbose]
-          zipfile.binmode # This might not be necessary depending on the zip file
-          zipfile.write(response.body)
+          puts "file downloaded" if options[:verbose]
+          tempfile.binmode # This might not be necessary depending on the zip file
+          tempfile.write(response.body)
         elsif response.code == 401
           puts "The username or password are invailed"
           return
@@ -90,32 +91,10 @@ module Lifft
           return
         end
       ensure
-        zipfile.close
+        tempfile.close
       end
 
       puts "Extracting the zip" if options[:verbose]
-      Zip::File.open(zipfile.path) do |zipFile|
-        # Handle entries one by one
-        zipFile.each do |entry|
-          # Extract to correct location
-          pathComponents = entry.name.split("/")
-
-          destFolder = pathComponents[0] + '.lproj'
-          destFile = pathComponents[1]
-
-          destPath = destFolder + '/' + destFile
-
-          if Dir.exists?(destFolder)
-            puts "Extracting #{destFile} to #{destPath}" if options[:verbose]
-            File.delete(destPath) if File.exist?(destPath)
-            entry.extract(destPath)
-          else
-            puts destFolder + " folder not found. Couldn't import " + destFile if options[:verbose]
-          end
-
-        end
-
-      end
 
     end
 
@@ -156,18 +135,18 @@ module Lifft
       projectName = options[:project]
 
       dir = Dir.mktmpdir
-      
+
       system("xcodebuild -exportLocalizations -localizationPath #{dir.chomp} -project #{projectName.chomp}"+warningSuppressor)
 
       body = {"file" => File.new(dir+"/en.xliff")}
 
       if !options[:new]
         # Update master
-        puts "Updateing " + stringFilePath if options[:verbose]
+        puts "Updateing " + "en.xliff" if options[:verbose]
         response = HTTMultiParty.post("https://api.getlocalization.com/#{project}/api/update-master/", :basic_auth => auth, :query => body)
         else
         # Upload new master
-        puts "Creating " + stringFilePath if options[:verbose]
+        puts "Creating " + "en.xliff" if options[:verbose]
         response = HTTMultiParty.post("https://api.getlocalization.com/#{project}/api/create-master/ios/en/", :basic_auth => auth, :query => body)
       end
 
