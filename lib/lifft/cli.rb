@@ -23,12 +23,6 @@ module Lifft
     desc "fetch [PROJECT]", "Used to fetch the latest localisations"
     def fetch(project)
 
-      # Check if we are in the right place
-#      if Dir.glob('*.lproj').empty?
-#        puts "Wrong directory please select the directory that contains the .lproj folders"
-#        return
-#      end
-
       username = options[:user]
 
       # Check if we need to ask for a password
@@ -79,10 +73,13 @@ module Lifft
         return
       else
         spinner.exit if options[:verbose]
+        puts "" if options[:verbose]
         if response.code == 200
-          puts "file downloaded" if options[:verbose]
+          puts "File downloaded" if options[:verbose]
           tempfile.binmode # This might not be necessary depending on the zip file
           tempfile.write(response.body)
+          puts "Importing the file" if options[:verbose]
+          system("xcodebuild -importLocalizations -localizationPath #{tempfile.chomp} -project #{projectName.chomp}"+warningSuppressor)
         elsif response.code == 401
           puts "The username or password are invailed"
           return
@@ -93,8 +90,6 @@ module Lifft
       ensure
         tempfile.close
       end
-
-      puts "Extracting the zip" if options[:verbose]
 
     end
 
