@@ -1,0 +1,3 @@
+#!/usr/bin/env ruby
+require 'lifft/cli'
+Lifft::CLI.start
