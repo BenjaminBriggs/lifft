@@ -23,6 +23,7 @@ module Lifft
     desc "fetch [PROJECT]", "Used to fetch the latest localisations"
     def fetch(project)
 
+      projectName = options[:project]
       username = options[:user]
 
       # Check if we need to ask for a password
@@ -48,8 +49,18 @@ module Lifft
       end
 
       auth = {:username => username, :password => password}
+      warningSuppressor = options[:verbose]? "" : " > /dev/null 2>&1"
 
-      puts "Fetching the zip. This may take a while" if options[:verbose]
+#
+      Dir.glob("**/*.lproj/") do |langFolder|
+
+      lang = File.basename(langFolder).chomp(".lproj")
+      puts langFolder
+      puts lang
+
+      puts "Fetching #{lang} files." if options[:verbose]
+      puts "https://api.getlocalization.com/#{project}/api/translations/file/en.xliff/#{lang}/" if options[:verbose]
+      puts "This may take a while!" if options[:verbose]
 
       if options[:verbose] then
         spinner = Thread.new do
@@ -67,7 +78,7 @@ module Lifft
       tempfile = Tempfile.new("file")
 
       begin
-        response = HTTParty.get("https://api.getlocalization.com/#{project}/api/translations/file/en.xliff/ar/", :basic_auth => auth, :timeout => options[:timeout])
+        response = HTTParty.get("https://api.getlocalization.com/#{project}/api/translations/file/en.xliff/#{lang}/", :basic_auth => auth, :timeout => options[:timeout])
       rescue
         puts "Oh no, somthing fucked up."
         return
@@ -79,17 +90,20 @@ module Lifft
           tempfile.binmode # This might not be necessary depending on the zip file
           tempfile.write(response.body)
           puts "Importing the file" if options[:verbose]
-          system("xcodebuild -importLocalizations -localizationPath #{tempfile.chomp} -project #{projectName.chomp}"+warningSuppressor)
+          system("xcodebuild -importLocalizations -localizationPath #{tempfile.path.chomp} -project #{projectName.chomp}"+warningSuppressor)
         elsif response.code == 401
           puts "The username or password are invailed"
           return
         else
           puts "Bad response. Close but no cigar."
-          return
+          puts "Couldn't fetch #{lang} files"
+          break
         end
       ensure
         tempfile.close
       end
+    end
+#
 
     end
 
