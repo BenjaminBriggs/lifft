@@ -1,5 +1,5 @@
 require "lifft/version"
 
 module Lifft
-  # Your code goes here...
+  # Your country goes here...
 end

@@ -7,6 +7,7 @@ require 'tmpdir'
 
 require 'thor'
 require 'httmultiparty'
+require 'countries'
 
 require 'lifft'
 
@@ -54,10 +55,9 @@ module Lifft
       Dir.glob("**/*.lproj/") do |langFolder|
 
       lang = File.basename(langFolder).chomp(".lproj")
-      puts langFolder
-      puts lang
+      country = Country.new(lang)
 
-      puts "Fetching #{lang} files." if options[:verbose]
+      puts "Fetching translations for #{country.name}." if options[:verbose]
       puts "https://api.getlocalization.com/#{project}/api/translations/file/en.xliff/#{lang}/" if options[:verbose]
       puts "This may take a while!" if options[:verbose]
 
@@ -95,7 +95,7 @@ module Lifft
           return
         else
           puts "Bad response. Close but no cigar."
-          puts "Couldn't fetch #{lang} files"
+          puts "Couldn't fetch translations for #{country.name}"
         end
       ensure
         tempfile.close
