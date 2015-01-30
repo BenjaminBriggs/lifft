@@ -7,7 +7,7 @@ require 'tmpdir'
 
 require 'thor'
 require 'httmultiparty'
-require 'countries'
+require 'iso-639'
 
 require 'lifft'
 
@@ -55,9 +55,16 @@ module Lifft
       Dir.glob("**/*.lproj/") do |langFolder|
 
       lang = File.basename(langFolder).chomp(".lproj")
-      country = Country.new(lang)
+      country = ISO_639.find_by_code(lang)
 
-      puts "Fetching translations for #{country.name}." if options[:verbose]
+      puts lang
+
+      if country.respond_to?(:english_name) then
+        puts "Fetching translations for #{country.english_name}." if options[:verbose]
+      else
+        puts "Fetching translations for #{lang}." if options[:verbose]
+      end
+
       puts "https://api.getlocalization.com/#{project}/api/translations/file/en.xliff/#{lang}/" if options[:verbose]
       puts "This may take a while!" if options[:verbose]
 
@@ -83,7 +90,7 @@ module Lifft
         return
       else
         spinner.exit if options[:verbose]
-        puts "" if options[:verbose]
+        puts "\r" if options[:verbose]
         if response.code == 200
           puts "File downloaded" if options[:verbose]
           tempfile.binmode # This might not be necessary depending on the zip file
@@ -95,7 +102,9 @@ module Lifft
           return
         else
           puts "Bad response. Close but no cigar."
-          puts "Couldn't fetch translations for #{country.name}"
+          if country.respond_to?(:english_name) then
+            puts "Sorry #{country.english_name} not this time."
+          end
         end
       ensure
         tempfile.close
