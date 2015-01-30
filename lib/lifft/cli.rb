@@ -24,10 +24,10 @@ module Lifft
     def fetch(project)
 
       # Check if we are in the right place
-      if Dir.glob('*.lproj').empty?
-        puts "Wrong directory please select the directory that contains the .lproj folders"
-        return
-      end
+#      if Dir.glob('*.lproj').empty?
+#        puts "Wrong directory please select the directory that contains the .lproj folders"
+#        return
+#      end
 
       username = options[:user]
 
