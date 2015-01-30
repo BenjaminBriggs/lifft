@@ -51,7 +51,6 @@ module Lifft
       auth = {:username => username, :password => password}
       warningSuppressor = options[:verbose]? "" : " > /dev/null 2>&1"
 
-#
       Dir.glob("**/*.lproj/") do |langFolder|
 
       lang = File.basename(langFolder).chomp(".lproj")
@@ -97,13 +96,11 @@ module Lifft
         else
           puts "Bad response. Close but no cigar."
           puts "Couldn't fetch #{lang} files"
-          break
         end
       ensure
         tempfile.close
       end
     end
-#
 
     end
 
