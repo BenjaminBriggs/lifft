@@ -8,9 +8,9 @@ Gem::Specification.new do |spec|
   spec.version       = Lifft::VERSION
   spec.authors       = ["Benjamin Briggs"]
   spec.email         = ["ben@palringo.com"]
-  spec.summary       = "A tool simple too for uploading Xliffs to GetLocalization"
+  spec.summary       = "Xliffs to GetLocalization"
   spec.description   = "A tool simple too for uploading Xliffs to GetLocalization"
-  spec.homepage      = ""
+  spec.homepage      = "https://github.com/BenjaminBriggs/lifft"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0")
