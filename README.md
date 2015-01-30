@@ -1,6 +1,6 @@
 # Lifft
 
-TODO: Write a gem description
+This is just a little helper for extracting Xliff files from an Xcode project and uploding them to the GetLocalization translation service.
 
 ## Installation
 
@@ -20,11 +20,13 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+    $ lifft update <the name of you GetLocalization project> --project <your.xcodeproj> -u <username> [-n (if it's new)]
+
+    $ lifft fetch <the name of you GetLocalization project> --project <your.xcodeproj> -u <username>
 
 ## Contributing
 
-1. Fork it ( https://github.com/[my-github-username]/lifft/fork )
+1. Fork it ( https://github.com/BenjaminBriggs/lifft/fork )
 2. Create your feature branch (`git checkout -b my-new-feature`)
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
